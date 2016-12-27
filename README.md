@@ -60,6 +60,7 @@ COMMANDS:
     pid		Print container name if it contains the given pid
     oom		Return true if a container is under oom
     pidnum	Print process numbers in your specified container
+    inspect Return low-level information on a container
 
 GLOBAL OPTIONS:
    --debug			debug mode [$DEBUG]

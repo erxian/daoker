@@ -52,5 +52,11 @@ var (
 			Usage:  "Print containers whose process number exceeds a specified number",
 			Action: pidExcContainer,
 		},
+		{
+			Name:   "inspect",
+			Usage:  "Return low-level information on a container",
+			Action: inspectContainer,
+
+		},
 	}
 )
