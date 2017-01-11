@@ -10,7 +10,8 @@ import (
 	"time"
 
 	"../utils"
-	containertypes "github.com/docker/engine-api/types/container"
+	containertypes "github.com/docker/engine-api/types/container"   //containertypes为包别名，包路径为github.com/docker/engine-api/types/container，包名为container 
+	networktypes "github.com/docker/engine-api/types/network"
 )
 
 type Container struct {
@@ -21,9 +22,18 @@ type Container struct {
 	Path        string
 	Args        []string
 	Config      *containertypes.Config
+	Networks    *networktypes.EndpointSettings //ss
 	MountPoints map[string]MountPoint
 	Name        string
 	LogPath     string
+	ResolvConfPath string
+	HostnamePath   string
+	HostsPath      string
+	RestartCount   int
+	Driver         string
+	MountLabel     string
+	ProcessLabel   string
+	AppArmorProfile    string
 }
 
 // Containers returns an array of docker containers unmarshaled from config.json
