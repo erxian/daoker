@@ -20,7 +20,7 @@ func inspectContainer(c *cli.Context) {
 		log.Fatal(err.Error())
 	}
 
-	containers, err := docker.Containers()  
+	containers, err := docker.Containers() 
 
 	if err != nil {
 		log.Fatal(err)
@@ -31,6 +31,7 @@ func inspectContainer(c *cli.Context) {
 		if ID != container.ID {
 			continue
 		}
+
 		fmt.Println("\n")
 		fmt.Println("*************************************\n")  
 		fmt.Printf("ID: %s \n", scon.ID)    
@@ -78,7 +79,20 @@ func inspectContainer(c *cli.Context) {
         fmt.Printf("Entrypoint : %s \n", scon.Config.Entrypoint)
         fmt.Printf("OnBuild : %v \n", scon.Config.OnBuild)
         fmt.Printf("Labels : %v \n", scon.Config.Labels)
-        fmt.Printf("NetworkID : %v \n", scon.Networks.NetworkID) 
+
+        if scon.Networks == nil{
+        fmt.Println("no network info \n")
+        }
+
+        networks, ok := scon.Networks["bridge"]
+        /* 如果 ok 是 true, 则存在，否则不存在 */
+        if(ok){
+          fmt.Println("NetworkID : %s\n", networks.NetworkID)  
+          }else {
+          fmt.Println("unknown \n") 
+        }
+
+        //fmt.Printf("NetworkID : %s \n", scon.Networks["bridge"].NetworkID) 
 		fmt.Println("*************************************\n\n")  
 
 	}

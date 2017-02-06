@@ -11,7 +11,7 @@ import (
 
 	"../utils"
 	containertypes "github.com/docker/engine-api/types/container"   //containertypes为包别名，包路径为github.com/docker/engine-api/types/container，包名为container 
-	networktypes "github.com/docker/engine-api/types/network"
+	networktypes "github.com/docker/docker/api/types/network"
 )
 
 type Container struct {
@@ -21,8 +21,8 @@ type Container struct {
 	Created     time.Time
 	Path        string
 	Args        []string
-	Config      *containertypes.Config
-	Networks    *networktypes.EndpointSettings //ss
+	Config      *containertypes.Config 
+	Networks    map[string]*networktypes.EndpointSettings
 	MountPoints map[string]MountPoint
 	Name        string
 	LogPath     string
@@ -60,7 +60,7 @@ func Containers() ([]Container, error) {
 			continue
 		}
 
-		containers = append(containers, con)
+		containers = append(containers, con) 
 	}
 	return containers, nil
 }
@@ -130,10 +130,13 @@ func getContainerFromConfig(containersPath, entryName string) (Container, error)
 	}
 
 	var con Container
+
+    con.Networks = make(map[string]*networktypes.EndpointSettings) //初始化Networks
+
 	if err := json.Unmarshal(data, &con); err != nil {
 		return Container{}, err
 	}
-
+    
 	return con, nil
 }
 
