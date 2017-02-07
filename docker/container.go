@@ -12,6 +12,7 @@ import (
 	"../utils"
 	containertypes "github.com/docker/engine-api/types/container"   //containertypes为包别名，包路径为github.com/docker/engine-api/types/container，包名为container 
 	networktypes "github.com/docker/docker/api/types/network"
+	"github.com/docker/go-connections/nat"
 )
 
 type Container struct {
@@ -22,7 +23,7 @@ type Container struct {
 	Path        string
 	Args        []string
 	Config      *containertypes.Config 
-	Networks    map[string]*networktypes.EndpointSettings
+	NetworkSettings *NetworkSettings     
 	MountPoints map[string]MountPoint
 	Name        string
 	LogPath     string
@@ -34,7 +35,44 @@ type Container struct {
 	MountLabel     string
 	ProcessLabel   string
 	AppArmorProfile    string
+
 }
+
+// NetworkSettings exposes the network settings in the api
+type NetworkSettings struct {
+	NetworkSettingsBase
+	DefaultNetworkSettings
+	Networks map[string]*networktypes.EndpointSettings
+}
+
+// NetworkSettingsBase holds basic information about networks
+type NetworkSettingsBase struct {
+	Bridge                 string      // Bridge is the Bridge name the network uses(e.g. `docker0`)
+	SandboxID              string      // SandboxID uniquely represents a container's network stack
+	HairpinMode            bool        // HairpinMode specifies if hairpin NAT should be enabled on the virtual interface
+	LinkLocalIPv6Address   string      // LinkLocalIPv6Address is an IPv6 unicast address using the link-local prefix
+	LinkLocalIPv6PrefixLen int         // LinkLocalIPv6PrefixLen is the prefix length of an IPv6 unicast address
+	Ports                  nat.PortMap // Ports is a collection of PortBinding indexed by Port
+	SandboxKey             string      // SandboxKey identifies the sandbox
+	SecondaryIPAddresses   []networktypes.Address
+	SecondaryIPv6Addresses []networktypes.Address
+}
+
+// DefaultNetworkSettings holds network information
+// during the 2 release deprecation period.
+// It will be removed in Docker 1.11.
+type DefaultNetworkSettings struct {
+	EndpointID          string // EndpointID uniquely represents a service endpoint in a Sandbox
+	Gateway             string // Gateway holds the gateway address for the network
+	GlobalIPv6Address   string // GlobalIPv6Address holds network's global IPv6 address
+	GlobalIPv6PrefixLen int    // GlobalIPv6PrefixLen represents mask length of network's global IPv6 address
+	IPAddress           string // IPAddress holds the IPv4 address for the network
+	IPPrefixLen         int    // IPPrefixLen represents mask length of network's IPv4 address
+	IPv6Gateway         string // IPv6Gateway holds gateway address specific for IPv6
+	MacAddress          string // MacAddress holds the MAC address for the network
+}
+
+
 
 // Containers returns an array of docker containers unmarshaled from config.json
 // in docker root path.
@@ -56,6 +94,7 @@ func Containers() ([]Container, error) {
 
 		// FIXME: ID is exactly correct, not to call getContainer to travese
 		con, err := getContainer(ID)
+
 		if err != nil {
 			continue
 		}
@@ -130,8 +169,6 @@ func getContainerFromConfig(containersPath, entryName string) (Container, error)
 	}
 
 	var con Container
-
-    con.Networks = make(map[string]*networktypes.EndpointSettings) //初始化Networks
 
 	if err := json.Unmarshal(data, &con); err != nil {
 		return Container{}, err
